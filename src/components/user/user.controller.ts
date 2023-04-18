@@ -1,0 +1,184 @@
+import bcrypt from "bcrypt";
+import jwt from  "jsonwebtoken";
+import { Request, Response } from 'express';
+
+import { IUserController } from './interfaces/user-controller.interface';
+import { UserService } from './user.service';
+import { IStoreUserDTO } from './interfaces/store-user.interface';
+import { IUpdateUserDTO } from './interfaces/update-user.interface';
+import { IResponseJson } from '../base/interfaces/response-json.interface';
+
+export class UserController extends UserService implements IUserController {
+    
+    constructor() {
+        super();
+    }
+
+    public async createUser(req: Request, res: Response): Promise<void> {
+        try {
+            const user: IStoreUserDTO = req.body;
+
+            if(user) {
+                const emailExists: IResponseJson = await super.findExistingEmailUserService(user.email);
+                
+                if(emailExists.status && !emailExists.data) {
+                    const result: IResponseJson = await super.createUserService(user);
+        
+                    if(result.status) {
+                        res.status(200);
+                        res.send("user successfully registered!");
+                    } else {
+                        res.status(400);
+                        res.json(result?.message);
+                    }
+                } else if(emailExists.status && emailExists.data) {
+                    res.status(400);
+                    res.send("Email already registered!")
+                    throw Error("Email already registered!");
+                } else {
+                    res.status(400);
+                    res.send(emailExists?.message)
+                }
+            }
+        } catch(error:any) {
+            console.error(error);
+        }
+    }
+
+    public async deleteUser(req: Request, res: Response): Promise<void> {
+        try {
+            const id: number = Number(req.params.id);
+            
+            if(id) {
+                const idExists: IResponseJson = await super.findByIdUserService(id);
+    
+                if(idExists.status && idExists.data) {
+                    const result: IResponseJson = await super.deleteUserService(id);
+            
+                    if(result.status) {
+                        res.status(200);
+                        res.send("'User deleted successfully!");
+                    } else {
+                        res.status(400);
+                        res.json(result?.message);
+                    }
+                } else if(idExists.status && !idExists.data) {
+                    res.status(404);
+                    res.send("User not found!")
+                    throw Error("User not found!") 
+                } else {
+                    res.status(400)
+                    res.send(idExists?.message);
+                }
+            }
+        } catch(error: any) {
+            console.error(error);
+        }
+    }
+
+    public async findUser(req: Request, res: Response): Promise<void> {
+        try {
+            const id: number = Number(req.params.id);
+
+            if(id) {
+                const result: IResponseJson = await super.findByIdUserService(id);
+
+                if(result.status && result.data) {
+                    res.status(200);
+                    res.json({status: 200, data: result.data});
+                } else if(result.status && !result.data) {
+                    res.status(404);
+                    res.json("User not found!");
+                    throw Error("User not found!") 
+                } else {
+                    res.status(400);
+                    res.json(result?.message);
+                }
+            }
+        } catch(error: any) {
+            console.error(error);
+        }
+    }
+
+    public async findAllUsers(req: Request, res: Response): Promise<void> {
+        try {
+            const result: IResponseJson = await super.findAllUserService();
+
+            if(result.status && result.data.length > 0) {
+                res.status(200);
+                res.json({status: 200, data: result.data});
+            } else if(result.status && result.data.length === 0) {
+                res.status(404);
+                res.json("Users not found!");
+                throw Error("Users not found!") 
+            } else {
+                res.status(400);
+                res.json(result?.message);
+            }    
+        } catch (error: any) {
+            console.error(error);
+        }
+    }
+
+    public async updateUser(req: Request, res: Response): Promise<any> {
+        try {
+            const user: IUpdateUserDTO = req.body;
+
+            if(user) {
+                const idExists: IResponseJson = await super.findByIdUserService(user.id);
+    
+                if(idExists.status && idExists.data) {
+                   
+                    const result: IResponseJson = await super.updateUserService(user);
+        
+                    if(result.status) {
+                        res.status(200);
+                        res.json({success:1});
+                    } else {
+                        res.status(400);
+                        res.json(result?.message);
+                    }
+                } else if(idExists.status && !idExists.data) {
+                    res.status(404);
+                    res.json("User not found!");
+                    throw Error("User not found!") 
+                } else {
+                    res.status(400);
+                    res.json(idExists?.message);
+                }
+            }
+        } catch (error: any) {
+            console.error(error);
+        }
+    }
+
+    public async login(req: Request, res: Response): Promise<any> {
+        try {
+            const {email, password} = req.body;
+            const user: IResponseJson = await super.findByEmailUserService(email);
+    
+            if(user.status && user.data) {
+                const secret: any = process.env.SECRET;
+                const result = await bcrypt.compare(password, user.data.password);
+    
+                if(result) {
+                    const token = jwt.sign({email: user.data.email, role: user.data.role}, secret);
+                    res.json({token: token})
+                } else {
+                    res.status(406);
+                    res.send("Invalid password!");
+                    throw Error("Invalid password!");
+                }
+            } else if(user.status && !user.data) {
+                res.status(404);
+                res.json("User not found!");
+                throw Error("User not found!") 
+            } else {
+                res.status(400);
+                res.send(user?.message)
+            }
+        } catch (error: any) {
+            console.error(error);
+        }
+    }
+}
