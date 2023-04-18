@@ -87,18 +87,14 @@ export class UserService implements IUserService {
 
     public async updateUserService(userParams: IUpdateUserDTO): Promise<IResponseJson> {
         try {
-            const result: IResponseJson = await new UserService().findByIdUserService(userParams.id);
-
-            if(result.status) {
-                const connection: IResponseJson = await connect();
-                
-                if(connection.status) {
-                   const queryResult: IResponseJson = await executeQuery(`UPDATE users SET name='${userParams.name}', email='${userParams.email}' WHERE id='${userParams.id}'`);
-
-                   if(queryResult.status) return {status: true, data: null}
-                }
+            const connection: IResponseJson = await connect();
+            
+            if(connection.status) {
+               const queryResult: IResponseJson = await executeQuery(`UPDATE users SET name='${userParams.name}', email='${userParams.email}' WHERE id='${userParams.id}'`);
+               
+               if(queryResult.status) return {status: true, data: null}
             }
-
+        
             return {status: false, data: null};
         } catch(error: any) {
             console.error(error);
