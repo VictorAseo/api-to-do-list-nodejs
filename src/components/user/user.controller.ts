@@ -7,6 +7,7 @@ import { UserService } from './user.service';
 import { IStoreUserDTO } from './interfaces/store-user.interface';
 import { IUpdateUserDTO } from './interfaces/update-user.interface';
 import { IResponseJson } from '../base/interfaces/response-json.interface';
+import { ILoginUserDTO } from "./interfaces/login-user.interface";
 
 export class UserController extends UserService implements IUserController {
     
@@ -154,15 +155,15 @@ export class UserController extends UserService implements IUserController {
 
     public async login(req: Request, res: Response): Promise<any> {
         try {
-            const {email, password} = req.body;
+            const { email, password }: ILoginUserDTO = req.body;
             const user: IResponseJson = await super.findByEmailUserService(email);
     
             if(user.status && user.data) {
                 const secret: any = process.env.SECRET;
-                const result = await bcrypt.compare(password, user.data.password);
+                const result: any = await bcrypt.compare(password, user.data.password);
     
                 if(result) {
-                    const token = jwt.sign({email: user.data.email, role: user.data.role}, secret);
+                    const token: any = jwt.sign({email: user.data.email, role: user.data.role}, secret);
                     res.json({token: token})
                 } else {
                     res.status(406);
