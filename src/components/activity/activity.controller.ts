@@ -4,6 +4,7 @@ import { IActivityController } from './interfaces/activity-controller.interface'
 import { ActivityService } from './activity.service';
 import { IStoreActivityDTO } from './interfaces/store-activity.interface';
 import { IResponseJson } from '../base/interfaces/response-json.interface';
+import { IUpdateActivityDTO } from './interfaces/update-activity.interface';
 
 export class ActivityController extends ActivityService implements IActivityController {
     
@@ -113,6 +114,38 @@ export class ActivityController extends ActivityService implements IActivityCont
                 res.json(result?.message);
             }
         } catch(error: any) {
+            console.error(error);
+        }
+    }
+
+    public async updateActivity(req: Request, res: Response): Promise<void> {
+        try {
+            const activity: IUpdateActivityDTO = req.body;
+
+            if(activity) {
+                const idExists: IResponseJson = await super.findByIdActivityService(activity.id);
+    
+                if(idExists.status && idExists.data) {
+                   
+                    const result: IResponseJson = await super.updateActivityService(activity);
+        
+                    if(result.status) {
+                        res.status(200);
+                        res.json({success:1});
+                    } else {
+                        res.status(400);
+                        res.json(result?.message);
+                    }
+                } else if(idExists.status && !idExists.data) {
+                    res.status(404);
+                    res.json("Activity not found!");
+                    throw Error("Activity not found!") 
+                } else {
+                    res.status(400);
+                    res.json(idExists?.message);
+                }
+            }
+        } catch (error: any) {
             console.error(error);
         }
     }

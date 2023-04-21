@@ -2,6 +2,7 @@ import { connect, executeQuery, disconnect } from '../../database/connection';
 import { IActivityService } from './interfaces/activity-service.interface';
 import { IStoreActivityDTO } from './interfaces/store-activity.interface';
 import { IResponseJson } from '../base/interfaces/response-json.interface';
+import { IUpdateActivityDTO } from './interfaces/update-activity.interface';
 
 export class ActivityService implements IActivityService {
 
@@ -57,6 +58,30 @@ export class ActivityService implements IActivityService {
             return {status: false, data: null};
         } catch(error: any) {
             console.error(error);
+            return {status: false, data: null, message: error?.toString()};
+        } finally {
+            await disconnect();
+        }
+    }
+
+    public async updateActivityService(activityParams: IUpdateActivityDTO): Promise<IResponseJson> {
+        try {
+            const { id, name, description } = activityParams;
+            const activityExists: IResponseJson = await new ActivityService().findByIdActivityService(id);
+
+            if(activityExists.status && activityExists.data) {
+                const connected: Boolean = await connect();
+
+                if(connected) {
+                    const queryResult: IResponseJson = await executeQuery(`UPDATE activities SET name=${name}, description=${description}, updated_at=NOW() WHERE id=${id}`)
+
+                    if(queryResult.status) return {status: true, data: null, message: 'Activity updated successfully!'}
+                }
+            }
+
+            return {status: false, data: null};
+        } catch(error: any) {
+            console.error(error)
             return {status: false, data: null, message: error?.toString()};
         } finally {
             await disconnect();

@@ -16,4 +16,5 @@ router.delete('/user/:id', new UserController().deleteUser);
 router.post('/activity', new ActivityController().createActivity);
 router.get('/activity', new ActivityController().findAllActivities);
 router.get('/activity/:id', new ActivityController().findActivity);
+router.put('/activity/:id', new ActivityController().updateActivity);
 router.delete('/activity/:id', new ActivityController().deleteActivity);
