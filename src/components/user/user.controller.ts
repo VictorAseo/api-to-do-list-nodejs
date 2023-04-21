@@ -121,7 +121,7 @@ export class UserController extends UserService implements IUserController {
         }
     }
 
-    public async updateUser(req: Request, res: Response): Promise<any> {
+    public async updateUser(req: Request, res: Response): Promise<void> {
         try {
             const user: IUpdateUserDTO = req.body;
 
@@ -153,7 +153,7 @@ export class UserController extends UserService implements IUserController {
         }
     }
 
-    public async login(req: Request, res: Response): Promise<any> {
+    public async login(req: Request, res: Response): Promise<void> {
         try {
             const { email, password }: ILoginUserDTO = req.body;
             const user: IResponseJson = await super.findByEmailUserService(email);
