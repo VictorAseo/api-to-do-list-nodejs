@@ -110,7 +110,7 @@ export class UserService implements IUserService {
             const connection: IResponseJson = await connect();
 
             if(connection.status) {
-                const queryResult: IResponseJson = await executeQuery(`SELECT email, password, role from users WHERE email='${email}'`);
+                const queryResult: IResponseJson = await executeQuery(`SELECT id, email, password, role from users WHERE email='${email}'`);
 
                 if(queryResult.status) return {status: true, data: queryResult.data?.length > 0 ? queryResult.data[0] : null};
             }
@@ -135,6 +135,46 @@ export class UserService implements IUserService {
             }
 
             return {status: false, data: null};
+        } catch(error: any) {
+            console.error(error);
+            return {status: false, data: null, message: error?.toString()};
+        } finally {
+            await disconnect();
+        }
+    }
+
+    public async saveToken(token: string, id_user: number): Promise<IResponseJson> {
+        try {
+            const connection: IResponseJson = await connect();
+
+            if(connection.status) {
+                const deleteQueryResult: IResponseJson = await executeQuery(`DELETE FROM tokens WHERE id_user=${id_user};`);
+                const insertQueryResult: IResponseJson = await executeQuery(`INSERT INTO tokens (token, id_user) VALUES ('${token}', ${id_user});`);
+
+                if(deleteQueryResult.status && insertQueryResult.status) return {status: true, data: 1};
+            }
+
+            return {status: true, data: null}
+        } catch(error: any) {
+            console.error(error);
+            return {status: false, data: null, message: error?.toString()};
+        } finally {
+            await disconnect();
+        }
+    }
+
+    public async checkToken(token: string, id_user: number): Promise<IResponseJson> {
+        try {
+            const connection: IResponseJson = await connect();
+
+            if(connection.status) {
+                const deleteQueryResult: IResponseJson = await executeQuery(`DELETE FROM tokens WHERE id_user=${id_user};`);
+                const insertQueryResult: IResponseJson = await executeQuery(`INSERT INTO tokens (token, id_user) VALUES ('${token}', ${id_user});`);
+
+                if(deleteQueryResult.status && insertQueryResult.status) return {status: true, data: 1};
+            }
+
+            return {status: true, data: null}
         } catch(error: any) {
             console.error(error);
             return {status: false, data: null, message: error?.toString()};

@@ -159,12 +159,20 @@ export class UserController extends UserService implements IUserController {
             const user: IResponseJson = await super.findByEmailUserService(email);
     
             if(user.status && user.data) {
-                const secret: any = process.env.SECRET;
+                const secret: string = process.env.SECRET ?? 'null';
                 const result: any = await bcrypt.compare(password, user.data.password);
     
                 if(result) {
-                    const token: any = jwt.sign({email: user.data.email, role: user.data.role}, secret);
-                    res.json({token: token})
+                    const token: string = jwt.sign({id: user.data.id, email: user.data.email, role: user.data.role}, secret);
+                    const saveToken: IResponseJson= await super.saveToken(token, user.data.id)
+
+                    if(!saveToken.status) {
+                        res.status(400);
+                        res.send(saveToken?.message);
+                        throw Error("Error saving token!");
+                    }
+
+                    res.json({token: token, idUser: user.data.id})
                 } else {
                     res.status(406);
                     res.send("Invalid password!");
