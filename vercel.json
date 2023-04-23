@@ -1,11 +1,4 @@
 {
-    "routes": [
-      {
-        "src": "/.*",
-        "dest": "/index.js"
-      }
-    ],
-    "output": {
-      "directory": "dist"
-    }
+    "outputDirectory": "dist",
+    "rewrites": [{ "source": "/(.*)", "destination": "/routes/router" }]
 }
