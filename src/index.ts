@@ -17,5 +17,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
-app.use(express.static("vercel/output"));
+app.use(express.static("public"));
 app.use("/", router);
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
