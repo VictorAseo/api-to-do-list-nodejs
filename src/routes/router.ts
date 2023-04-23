@@ -8,7 +8,7 @@ import { Auth } from '../middleware/auth';
 export const router: IRouter = express.Router();
 
 router.post('/login', new UserController().login);
-router.post('/user', Auth, new UserController().createUser);
+router.post('/user', new UserController().createUser);
 router.get('/user', Auth, new UserController().findAllUsers);
 router.get('/user/:id', Auth, new UserController().findUser);
 router.put('/user/:id', Auth, new UserController().updateUser);
