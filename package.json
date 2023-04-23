@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsup src --dts && tsup run",
+    "build": "tsup src --dts && node dist/index.js",
     "test": "vitest"
   },
   "author": "",
