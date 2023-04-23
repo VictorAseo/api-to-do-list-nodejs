@@ -2,8 +2,12 @@
     "version": 2,
     "routes": [
         {
-            "src": "(.*)",
-            "dest": "src/routes/router.ts"
-        }
+            "src": "/(.*)",
+            "dest": "src/index.ts"
+          },
+          {
+            "src": "/(.*)",
+            "dest": "dist/$1"
+          }
     ]
 }
