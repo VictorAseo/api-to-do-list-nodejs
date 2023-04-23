@@ -4,7 +4,11 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 const app: Application = express();
+
 const PORT: string | number = process.env.PORT || 8686;
 
 app.listen(PORT, (): void => console.log("Server running on 8686"));
